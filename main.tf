@@ -23,10 +23,18 @@ resource "aws_s3_bucket" "www-domain" {
 
   website {
     index_document = "index.html"
+    error_document = "404.html"
   }
 
   tags = {
     Name = "Managed by Terraform"
+  }
+  server_side_encryption_configuration {
+      rule {
+          apply_server_side_encryption_by_default {
+              sse_algorithm = "AES256"
+          }
+      }
   }
 }
 
@@ -63,6 +71,12 @@ resource "aws_cloudfront_distribution" "www_distribution" {
       cookies {
         forward = "none"
       }
+    }
+    
+    lambda_function_association {
+        event_type   = "viewer-response"
+        include_body = false
+        lambda_arn   = "arn:aws:lambda:us-east-1:566369838377:function:cloudfront_headers:8"
     }
   }
 
@@ -114,6 +128,17 @@ resource "aws_route53_record" "www-domain" {
     zone_id                = aws_cloudfront_distribution.www_distribution.hosted_zone_id
     evaluate_target_health = false
   }
+}
+
+# google search index domain ownership verification
+
+
+resource "aws_route53_record" "google-verification" {
+  zone_id = aws_route53_zone.zone.zone_id
+  name    = var.domain
+  type    = "TXT"
+  ttl     = 300
+  records = ["google-site-verification=_jN0vPynTmZfWI7Aau8-WA1FiqtT2bTo6HCN1t7octc"]
 }
 
 ########################## ACM ########################
