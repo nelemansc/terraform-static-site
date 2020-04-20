@@ -13,6 +13,14 @@ resource "aws_s3_bucket" "bare-domain" {
   tags = {
     Name = "Managed by Terraform"
   }
+
+  server_side_encryption_configuration {
+      rule {
+          apply_server_side_encryption_by_default {
+              sse_algorithm = "AES256"
+          }
+      }
+  }
 }
 
 # create the www bucket - web files are stored here
@@ -29,6 +37,7 @@ resource "aws_s3_bucket" "www-domain" {
   tags = {
     Name = "Managed by Terraform"
   }
+
   server_side_encryption_configuration {
       rule {
           apply_server_side_encryption_by_default {

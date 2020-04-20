@@ -10,5 +10,6 @@ terraform {
     dynamodb_table = "terraform-dynamodb-table"
     region         = "us-east-1"
     key            = "s3/cassidynelemans.com/terraform.tfstate"
+    encrypt        = true
   }
 }
