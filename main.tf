@@ -85,7 +85,7 @@ resource "aws_cloudfront_distribution" "www_distribution" {
     lambda_function_association {
         event_type   = "viewer-response"
         include_body = false
-        lambda_arn   = "arn:aws:lambda:us-east-1:566369838377:function:cloudfront_headers:8"
+        lambda_arn   = aws_lambda_function.lambda.qualified_arn
     }
   }
 
@@ -102,6 +102,53 @@ resource "aws_cloudfront_distribution" "www_distribution" {
     ssl_support_method  = "sni-only"
   }
 }
+
+################### Cloudfront Lambda@Edge ######################
+resource "aws_lambda_function" "lambda" {
+    function_name                  = "cloudfront_headers"
+    handler                        = "index.handler"
+    memory_size                    = 128
+    role                           = aws_iam_role.lambda-role.arn
+    runtime                        = "nodejs12.x"
+    source_code_hash               = "27D4at9FRU6i5Sc9qUMgWQBxOyx3kc44OwQD31Ingso="
+    timeout                        = 3
+
+    tracing_config {
+        mode = "PassThrough"
+    }
+}
+
+data "archive_file" "lambda_zip" {
+    type          = "zip"
+    source_file   = "./files/cloudfront_headers"
+    output_path   = "./files/cloudfront_headers.zip"
+}
+
+################### Lambda IAM Role ############################
+resource "aws_iam_role" "lambda-role" {
+    assume_role_policy    = jsonencode(
+        {
+            Statement = [
+                {
+                    Action    = "sts:AssumeRole"
+                    Effect    = "Allow"
+                    Principal = {
+                        Service = [
+                            "edgelambda.amazonaws.com",
+                            "lambda.amazonaws.com",
+                        ]
+                    }
+                },
+            ]
+            Version   = "2012-10-17"
+        }
+    )
+    force_detach_policies = false
+    max_session_duration  = 3600
+    name                  = "cloudfront_headers-role-wy7mdbqc"
+    path                  = "/service-role/"
+}
+
 
 ################### Route53 ######################
 
