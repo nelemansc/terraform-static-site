@@ -15,11 +15,11 @@ resource "aws_s3_bucket" "bare-domain" {
   }
 
   server_side_encryption_configuration {
-      rule {
-          apply_server_side_encryption_by_default {
-              sse_algorithm = "AES256"
-          }
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
       }
+    }
   }
 }
 
@@ -39,11 +39,11 @@ resource "aws_s3_bucket" "www-domain" {
   }
 
   server_side_encryption_configuration {
-      rule {
-          apply_server_side_encryption_by_default {
-              sse_algorithm = "AES256"
-          }
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
       }
+    }
   }
 }
 
@@ -81,11 +81,11 @@ resource "aws_cloudfront_distribution" "www_distribution" {
         forward = "none"
       }
     }
-    
+
     lambda_function_association {
-        event_type   = "viewer-response"
-        include_body = false
-        lambda_arn   = aws_lambda_function.lambda.qualified_arn
+      event_type   = "viewer-response"
+      include_body = false
+      lambda_arn   = aws_lambda_function.lambda.qualified_arn
     }
   }
 
@@ -105,50 +105,50 @@ resource "aws_cloudfront_distribution" "www_distribution" {
 
 ################### Cloudfront Lambda@Edge ######################
 resource "aws_lambda_function" "lambda" {
-    function_name                  = "cloudfront_headers"
-    handler                        = "index.handler"
-    memory_size                    = 128
-    role                           = aws_iam_role.lambda-role.arn
-    runtime                        = "nodejs12.x"
-    filename                       = "./files/index.js.zip"
-    source_code_hash               = data.archive_file.lambda_zip.output_base64sha256
-    publish                        = true
-    timeout                        = 3
+  function_name    = "cloudfront_headers"
+  handler          = "index.handler"
+  memory_size      = 128
+  role             = aws_iam_role.lambda-role.arn
+  runtime          = "nodejs12.x"
+  filename         = "./files/index.js.zip"
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  publish          = true
+  timeout          = 3
 
-    tracing_config {
-        mode = "PassThrough"
-    }
+  tracing_config {
+    mode = "PassThrough"
+  }
 }
 
 data "archive_file" "lambda_zip" {
-    type          = "zip"
-    source_file   = "./files/index.js"
-    output_path   = "./files/index.js.zip"
+  type        = "zip"
+  source_file = "./files/index.js"
+  output_path = "./files/index.js.zip"
 }
 
 ################### Lambda IAM Role ############################
 resource "aws_iam_role" "lambda-role" {
-    assume_role_policy    = jsonencode(
+  assume_role_policy = jsonencode(
+    {
+      Statement = [
         {
-            Statement = [
-                {
-                    Action    = "sts:AssumeRole"
-                    Effect    = "Allow"
-                    Principal = {
-                        Service = [
-                            "edgelambda.amazonaws.com",
-                            "lambda.amazonaws.com",
-                        ]
-                    }
-                },
+          Action = "sts:AssumeRole"
+          Effect = "Allow"
+          Principal = {
+            Service = [
+              "edgelambda.amazonaws.com",
+              "lambda.amazonaws.com",
             ]
-            Version   = "2012-10-17"
-        }
-    )
-    force_detach_policies = false
-    max_session_duration  = 3600
-    name                  = "cloudfront_headers-role-wy7mdbqc"
-    path                  = "/service-role/"
+          }
+        },
+      ]
+      Version = "2012-10-17"
+    }
+  )
+  force_detach_policies = false
+  max_session_duration  = 3600
+  name                  = "cloudfront_headers-role-wy7mdbqc"
+  path                  = "/service-role/"
 }
 
 
@@ -201,13 +201,13 @@ resource "aws_route53_record" "google-verification" {
 
 ########################## ACM ########################
 resource "aws_acm_certificate" "cert" {
-    domain_name               = "*.${var.domain}"
-    subject_alternative_names = [
-        "${var.domain}",
-    ]
-    validation_method         = "DNS"
+  domain_name = "*.${var.domain}"
+  subject_alternative_names = [
+    "${var.domain}",
+  ]
+  validation_method = "DNS"
 
-    options {
-        certificate_transparency_logging_preference = "ENABLED"
-    }
+  options {
+    certificate_transparency_logging_preference = "ENABLED"
+  }
 }
