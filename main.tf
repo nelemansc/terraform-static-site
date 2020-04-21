@@ -189,7 +189,7 @@ resource "aws_route53_record" "www-domain" {
 }
 
 # google search index domain ownership verification
-
+# https://support.google.com/webmasters/answer/9008080?hl=en
 
 resource "aws_route53_record" "google-verification" {
   zone_id = aws_route53_zone.zone.zone_id

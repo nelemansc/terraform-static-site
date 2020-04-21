@@ -28,6 +28,15 @@ exports.handler = (event, context, callback) => {
         value: "same-origin"
     }];
     
+    headers['x-powered-by'] = [{
+        key:   'X-Powered-By',
+        value: "coffee and craft brews"
+    }];
+
     headers['server'] = [{
         key:   'server',
         value: "starlink"
+    }];
+    
+    callback(null, response);
+};
