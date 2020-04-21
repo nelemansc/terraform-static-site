@@ -1,0 +1,46 @@
+name: 'Terraform GitHub Actions'
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@master
+      - name: 'Terraform Format'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.21
+          tf_actions_subcommand: 'fmt'
+        env:
+          TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.21
+          tf_actions_subcommand: 'init'
+        env:
+          TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 'Terraform Validate'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.21
+          tf_actions_subcommand: 'validate'
+        env:
+          TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: 'Terraform Plan'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.21
+          tf_actions_subcommand: 'plan'
+        env:
+          TF_VAR_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          TF_VAR_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
