@@ -110,7 +110,9 @@ resource "aws_lambda_function" "lambda" {
     memory_size                    = 128
     role                           = aws_iam_role.lambda-role.arn
     runtime                        = "nodejs12.x"
-    source_code_hash               = "27D4at9FRU6i5Sc9qUMgWQBxOyx3kc44OwQD31Ingso="
+    filename                       = "./files/index.js.zip"
+    source_code_hash               = data.archive_file.lambda_zip.output_base64sha256
+    publish                        = true
     timeout                        = 3
 
     tracing_config {
@@ -120,8 +122,8 @@ resource "aws_lambda_function" "lambda" {
 
 data "archive_file" "lambda_zip" {
     type          = "zip"
-    source_file   = "./files/cloudfront_headers"
-    output_path   = "./files/cloudfront_headers.zip"
+    source_file   = "./files/index.js"
+    output_path   = "./files/index.js.zip"
 }
 
 ################### Lambda IAM Role ############################
