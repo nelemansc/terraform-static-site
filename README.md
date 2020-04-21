@@ -8,5 +8,5 @@ Deploys the following:
 - Bare domain S3 bucket
 - www domain S3 bucket
 - Cloudfront distribution for TLS support
-- Lambda@Edge to add certain HTTP security headers returned as part of the Cloudfront viewer response
+- Lambda@Edge Lambda function to add HTTP security headers returned as part of the Cloudfront viewer response
 - Route53 records to resolve the bare and www to the Cloudfront distribution
