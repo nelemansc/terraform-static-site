@@ -23,7 +23,7 @@ resource "aws_s3_bucket" "bare-domain" {
   }
 }
 
-# create the www bucket - web files are stored here
+# create the www S3 bucket - web files are stored here
 
 resource "aws_s3_bucket" "www-domain" {
   bucket = "www.${var.domain}"
@@ -48,6 +48,8 @@ resource "aws_s3_bucket" "www-domain" {
 }
 
 ################### Cloudfront ######################
+
+# create the Cloudfront distribution so the S3 static website uses HTTPS
 
 resource "aws_cloudfront_distribution" "www_distribution" {
   origin {
@@ -104,6 +106,9 @@ resource "aws_cloudfront_distribution" "www_distribution" {
 }
 
 ################### Cloudfront Lambda@Edge ######################
+
+# create a lambda to pass http security headers as part of the viewer response
+
 resource "aws_lambda_function" "lambda" {
   function_name    = "cloudfront_headers"
   handler          = "index.handler"
@@ -120,6 +125,8 @@ resource "aws_lambda_function" "lambda" {
   }
 }
 
+# make terraform zip the lambda code so it can be pushed up to lambda
+
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_file = "./files/index.js"
@@ -127,6 +134,10 @@ data "archive_file" "lambda_zip" {
 }
 
 ################### Lambda IAM Role ############################
+
+# create a role for the lambda to assume so it can run
+# notice the edgelambda.amazonaws.com addition for allowing lambda@edge
+
 resource "aws_iam_role" "lambda-role" {
   assume_role_policy = jsonencode(
     {
@@ -154,13 +165,13 @@ resource "aws_iam_role" "lambda-role" {
 
 ################### Route53 ######################
 
-# hosted zone
+# creates the hosted zone
 
 resource "aws_route53_zone" "zone" {
   name = var.domain
 }
 
-# bare domain
+# creates the dns record for the bare domain
 
 resource "aws_route53_record" "bare-domain" {
   zone_id = aws_route53_zone.zone.zone_id
@@ -174,7 +185,7 @@ resource "aws_route53_record" "bare-domain" {
   }
 }
 
-# www domain
+# creates the dns record for the www domain
 
 resource "aws_route53_record" "www-domain" {
   zone_id = aws_route53_zone.zone.zone_id
@@ -200,6 +211,12 @@ resource "aws_route53_record" "google-verification" {
 }
 
 ########################## ACM ########################
+
+# manages the ACM certificate under terraform state
+# note that the certificate is created outside of terraform
+# and then imported into state due to restrictions on
+# acm cert generation done throgh the cli
+
 resource "aws_acm_certificate" "cert" {
   domain_name = "*.${var.domain}"
   subject_alternative_names = [
