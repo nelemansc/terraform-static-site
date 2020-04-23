@@ -207,7 +207,7 @@ resource "aws_route53_record" "google-verification" {
   name    = var.domain
   type    = "TXT"
   ttl     = 300
-  records = ["google-site-verification=_jN0vPynTmZfWI7Aau8-WA1FiqtT2bTo6HCN1t7octc"]
+  records = [var.google_verification]
 }
 
 ########################## ACM ########################
