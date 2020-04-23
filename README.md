@@ -10,4 +10,3 @@ Deploys the following:
 - Cloudfront distribution for TLS support
 - Lambda@Edge Lambda function to add HTTP security headers returned as part of the Cloudfront viewer response
 - Route53 records to resolve the bare and www to the Cloudfront distribution
-
