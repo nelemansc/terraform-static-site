@@ -1,4 +1,4 @@
-# terraform-cassidynelemans.com
+# terraform-static-site
 
 Terraform code to deploy the infrastructure needed to host https://www.cassidynelemans.com
 
