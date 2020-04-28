@@ -2,7 +2,7 @@
 
 Terraform code to deploy the infrastructure needed to host https://www.cassidynelemans.com
 
-Website repo is located here: https://github.com/nelemansc/cassidynelemans.com
+Website repo is located here: https://github.com/nelemansc/hugo-static-site
 
 Deploys the following:
 - Bare domain S3 bucket
