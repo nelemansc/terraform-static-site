@@ -120,7 +120,7 @@ resource "aws_cloudfront_distribution" "bare_domain_distribution" {
     origin_id   = var.domain
   }
 
-  enabled             = true
+  enabled = true
 
   default_cache_behavior {
     viewer_protocol_policy = "redirect-to-https"
@@ -234,8 +234,8 @@ resource "aws_route53_record" "bare-domain" {
   type    = "A"
 
   alias {
-    name                   = aws_cloudfront_distribution.bare_domain_distribution.domain_name        #aws_s3_bucket.bare-domain.website_domain
-    zone_id                = aws_cloudfront_distribution.bare_domain_distribution.hosted_zone_id     #aws_s3_bucket.bare-domain.hosted_zone_id
+    name                   = aws_cloudfront_distribution.bare_domain_distribution.domain_name
+    zone_id                = aws_cloudfront_distribution.bare_domain_distribution.hosted_zone_id
     evaluate_target_health = false
   }
 }
