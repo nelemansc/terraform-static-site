@@ -49,7 +49,7 @@ resource "aws_s3_bucket" "www-domain" {
 
 ################### Cloudfront ######################
 
-# create the Cloudfront distribution so the S3 static website uses HTTPS
+# create the www Cloudfront distribution so the S3 static website uses HTTPS
 
 resource "aws_cloudfront_distribution" "www_distribution" {
   origin {
@@ -92,6 +92,61 @@ resource "aws_cloudfront_distribution" "www_distribution" {
   }
 
   aliases = ["www.${var.domain}"]
+
+  restrictions {
+    geo_restriction {
+      restriction_type = "none"
+    }
+  }
+
+  viewer_certificate {
+    acm_certificate_arn = aws_acm_certificate.cert.arn
+    ssl_support_method  = "sni-only"
+  }
+}
+
+# create the bare domain Cloudfront distribution so the S3 static website uses HTTPS
+
+resource "aws_cloudfront_distribution" "bare_domain_distribution" {
+  origin {
+    custom_origin_config {
+      http_port              = "80"
+      https_port             = "443"
+      origin_protocol_policy = "http-only"
+      origin_ssl_protocols   = ["TLSv1", "TLSv1.1", "TLSv1.2"]
+    }
+
+    domain_name = aws_s3_bucket.bare-domain.website_endpoint
+    origin_id   = var.domain
+  }
+
+  enabled             = true
+
+  default_cache_behavior {
+    viewer_protocol_policy = "redirect-to-https"
+    compress               = true
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    target_origin_id       = var.domain
+    min_ttl                = 0
+    default_ttl            = 86400
+    max_ttl                = 31536000
+
+    forwarded_values {
+      query_string = false
+      cookies {
+        forward = "none"
+      }
+    }
+
+    lambda_function_association {
+      event_type   = "viewer-response"
+      include_body = false
+      lambda_arn   = aws_lambda_function.lambda.qualified_arn
+    }
+  }
+
+  aliases = ["${var.domain}"]
 
   restrictions {
     geo_restriction {
@@ -179,8 +234,8 @@ resource "aws_route53_record" "bare-domain" {
   type    = "A"
 
   alias {
-    name                   = aws_s3_bucket.bare-domain.website_domain
-    zone_id                = aws_s3_bucket.bare-domain.hosted_zone_id
+    name                   = aws_cloudfront_distribution.bare_domain_distribution.domain_name        #aws_s3_bucket.bare-domain.website_domain
+    zone_id                = aws_cloudfront_distribution.bare_domain_distribution.hosted_zone_id     #aws_s3_bucket.bare-domain.hosted_zone_id
     evaluate_target_health = false
   }
 }
