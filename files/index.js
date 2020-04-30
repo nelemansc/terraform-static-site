@@ -8,6 +8,16 @@ exports.handler = (event, context, callback) => {
         value: "max-age=31536000; includeSubdomains; preload"
     }];
 
+    headers['content-security-policy'] = [{
+        key:   'Content-Security-Policy',
+        value: "default-src 'none'; font-src 'self'; img-src 'self' data: https:; script-src 'self' 'sha256-ZUBnUDfsX/mhVi0F0de6Opxnc1S4t7vaSqZs0/XW+R0=' 'sha256-AcZHBRd1XuxlEnarbX/geO9CkqhjUcvk6yLPqe+p2Nw=' 'sha256-0HI3nX1RARjFCqzL9ivUeKOYwI+pzT3ArGHEWpZvntE='; style-src 'self' 'unsafe-inline'; object-src 'self' data: blob:; frame-src 'self'"
+    }];
+
+    headers['feature-policy'] = [{
+        key:   'Feature-Policy',
+        value: "geolocation 'none'; "
+    }];
+	
     headers['x-content-type-options'] = [{
         key:   'X-Content-Type-Options',
         value: "nosniff"
@@ -34,7 +44,7 @@ exports.handler = (event, context, callback) => {
     }];
 
     headers['server'] = [{
-        key:   'server',
+        key:   'Server',
         value: "starlink"
     }];
     
